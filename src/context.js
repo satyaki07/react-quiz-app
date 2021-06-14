@@ -24,6 +24,42 @@ const AppProvider = ({ children }) => {
   const [error, setError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const fetchQuestions = async (url) => {
+    setLoading(true);
+    setWaiting(false);
+    const response = await axios(url).catch((err) => console.log(err));
+    if (response) {
+      const data = response.data.results;
+      if (data.length > 0) {
+        setQuestions(data);
+        setLoading(false);
+        setWaiting(false);
+        setError(false);
+      } else {
+        setWaiting(true);
+        setError(true);
+      }
+    } else {
+      setWaiting(true);
+    }
+  };
+
+  const nextQuestion = () => {
+    setIndex((oldIndex) => {
+      const index = oldIndex + 1;
+      if (index > questions.length - 1) {
+        // Open Modal
+        return 0;
+      } else {
+        return index;
+      }
+    });
+  };
+
+  useEffect(() => {
+    fetchQuestions(tempUrl);
+  }, []);
+
   return (
     <AppContext.Provider
       value={{
@@ -34,6 +70,7 @@ const AppProvider = ({ children }) => {
         correct,
         error,
         isModalOpen,
+        nextQuestion,
       }}
     >
       {children}
